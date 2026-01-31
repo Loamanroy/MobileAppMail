@@ -200,7 +200,7 @@ class MailAppTester:
         """Test get email detail endpoint structure"""
         try:
             test_email_id = str(uuid.uuid4())
-            params = {"user_id": "test_user_id_123"}
+            params = {"user_id": "507f1f77bcf86cd799439011"}
             
             response = self.session.get(f"{self.base_url}/emails/{test_email_id}", params=params)
             
@@ -227,7 +227,7 @@ class MailAppTester:
         """Test send email endpoint structure"""
         try:
             send_data = {
-                "user_id": "test_user_id_123",
+                "user_id": "507f1f77bcf86cd799439011",
                 "to": ["recipient@example.com"],
                 "cc": [],
                 "subject": "Test Email",
@@ -260,7 +260,7 @@ class MailAppTester:
     def test_get_folders_structure(self):
         """Test get folders endpoint structure"""
         try:
-            params = {"user_id": "test_user_id_123"}
+            params = {"user_id": "507f1f77bcf86cd799439011"}
             
             response = self.session.get(f"{self.base_url}/folders", params=params)
             
@@ -289,7 +289,7 @@ class MailAppTester:
         """Test update read status endpoint structure"""
         try:
             test_email_id = str(uuid.uuid4())
-            params = {"user_id": "test_user_id_123"}
+            params = {"user_id": "507f1f77bcf86cd799439011"}
             update_data = {"is_read": True}
             
             response = self.session.put(
@@ -322,7 +322,7 @@ class MailAppTester:
         """Test delete email endpoint structure"""
         try:
             test_email_id = str(uuid.uuid4())
-            params = {"user_id": "test_user_id_123"}
+            params = {"user_id": "507f1f77bcf86cd799439011"}
             
             response = self.session.delete(f"{self.base_url}/emails/{test_email_id}", params=params)
             
@@ -349,7 +349,7 @@ class MailAppTester:
         """Test search emails endpoint structure"""
         try:
             params = {
-                "user_id": "test_user_id_123",
+                "user_id": "507f1f77bcf86cd799439011",
                 "query": "test",
                 "limit": 10
             }
