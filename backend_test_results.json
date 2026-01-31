@@ -1,0 +1,94 @@
+{
+  "summary": {
+    "passed": 7,
+    "total": 12,
+    "success_rate": 0.5833333333333334,
+    "timestamp": "2026-01-31T14:50:15.265466"
+  },
+  "results": [
+    {
+      "test": "Root Endpoint",
+      "success": true,
+      "message": "API is accessible",
+      "details": null,
+      "timestamp": "2026-01-31T14:50:09.773771"
+    },
+    {
+      "test": "Auth Login Structure",
+      "success": true,
+      "message": "Endpoint correctly validates IMAP connection",
+      "details": null,
+      "timestamp": "2026-01-31T14:50:10.370738"
+    },
+    {
+      "test": "Auth Validation",
+      "success": true,
+      "message": "Correctly validates input fields",
+      "details": null,
+      "timestamp": "2026-01-31T14:50:10.763984"
+    },
+    {
+      "test": "Email Sync Structure",
+      "success": false,
+      "message": "HTTP 520",
+      "details": "{\"detail\":\"Sync failed: 'test_user_id_123' is not a valid ObjectId, it must be a 12-byte input or a 24-character hex string\"}",
+      "timestamp": "2026-01-31T14:50:11.371351"
+    },
+    {
+      "test": "Get Emails Structure",
+      "success": true,
+      "message": "Returns list format (0 emails)",
+      "details": null,
+      "timestamp": "2026-01-31T14:50:12.371179"
+    },
+    {
+      "test": "Get Email Detail Structure",
+      "success": true,
+      "message": "Correctly handles non-existent email",
+      "details": null,
+      "timestamp": "2026-01-31T14:50:12.763122"
+    },
+    {
+      "test": "Send Email Structure",
+      "success": false,
+      "message": "HTTP 520",
+      "details": "{\"detail\":\"Failed to send email: 'test_user_id_123' is not a valid ObjectId, it must be a 12-byte input or a 24-character hex string\"}",
+      "timestamp": "2026-01-31T14:50:13.273473"
+    },
+    {
+      "test": "Get Folders Structure",
+      "success": false,
+      "message": "HTTP 520",
+      "details": "{\"detail\":\"Failed to get folders: 'test_user_id_123' is not a valid ObjectId, it must be a 12-byte input or a 24-character hex string\"}",
+      "timestamp": "2026-01-31T14:50:13.763054"
+    },
+    {
+      "test": "Update Read Status Structure",
+      "success": true,
+      "message": "Correctly handles non-existent email",
+      "details": null,
+      "timestamp": "2026-01-31T14:50:14.121372"
+    },
+    {
+      "test": "Delete Email Structure",
+      "success": true,
+      "message": "Correctly handles non-existent email",
+      "details": null,
+      "timestamp": "2026-01-31T14:50:14.512460"
+    },
+    {
+      "test": "Search Emails Structure",
+      "success": false,
+      "message": "HTTP 404",
+      "details": "{\"detail\":\"Email not found\"}",
+      "timestamp": "2026-01-31T14:50:14.869311"
+    },
+    {
+      "test": "CORS Headers",
+      "success": false,
+      "message": "Missing CORS headers (0/3)",
+      "details": null,
+      "timestamp": "2026-01-31T14:50:15.265172"
+    }
+  ]
+}
