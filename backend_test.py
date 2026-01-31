@@ -169,7 +169,7 @@ class MailAppTester:
         """Test get emails endpoint structure"""
         try:
             params = {
-                "user_id": "test_user_id_123",
+                "user_id": "507f1f77bcf86cd799439011",
                 "folder": "INBOX",
                 "limit": 10,
                 "skip": 0
