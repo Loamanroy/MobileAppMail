@@ -333,15 +333,14 @@ metadata:
 
 test_plan:
   current_focus:
-    - "IMAP/SMTP authentication"
-    - "Email synchronization from IMAP"
-    - "Get emails from cache"
-    - "Send email via SMTP"
-    - "Get folders from IMAP"
-  stuck_tasks: []
+    - "Search emails"
+  stuck_tasks: 
+    - "Search emails"
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
     message: "Implemented complete mail application backend with IMAP/SMTP support and frontend with all required screens. Backend needs testing with real IMAP/SMTP credentials. All API endpoints are implemented. Frontend is complete but not yet tested - awaiting user permission to test."
+  - agent: "testing"
+    message: "✅ BACKEND TESTING COMPLETE: 8/9 tasks working correctly. All API endpoints are accessible and properly structured. Database connection confirmed working. IMAP/SMTP integration works as expected with mock credentials. ❌ CRITICAL BUG FOUND: Search endpoint has route ordering issue - /emails/search is being matched by /emails/{email_id} route. This must be fixed by moving the search route BEFORE the email detail route in server.py."
