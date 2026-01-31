@@ -1,9 +1,9 @@
 {
   "summary": {
-    "passed": 7,
+    "passed": 8,
     "total": 12,
-    "success_rate": 0.5833333333333334,
-    "timestamp": "2026-01-31T14:51:31.881379"
+    "success_rate": 0.6666666666666666,
+    "timestamp": "2026-01-31T14:54:28.025117"
   },
   "results": [
     {
@@ -11,84 +11,86 @@
       "success": true,
       "message": "API is accessible",
       "details": null,
-      "timestamp": "2026-01-31T14:51:25.622922"
+      "timestamp": "2026-01-31T14:54:21.671085"
     },
     {
       "test": "Auth Login Structure",
       "success": true,
       "message": "Endpoint correctly validates IMAP connection",
       "details": null,
-      "timestamp": "2026-01-31T14:51:26.370976"
+      "timestamp": "2026-01-31T14:54:22.265490"
     },
     {
       "test": "Auth Validation",
       "success": true,
       "message": "Correctly validates input fields",
       "details": null,
-      "timestamp": "2026-01-31T14:51:27.063274"
+      "timestamp": "2026-01-31T14:54:22.906631"
     },
     {
       "test": "Email Sync Structure",
       "success": false,
       "message": "HTTP 520",
       "details": "{\"detail\":\"Sync failed: 404: User not found\"}",
-      "timestamp": "2026-01-31T14:51:27.619060"
+      "timestamp": "2026-01-31T14:54:23.778664"
     },
     {
       "test": "Get Emails Structure",
       "success": true,
       "message": "Returns list format (0 emails)",
       "details": null,
-      "timestamp": "2026-01-31T14:51:28.120807"
+      "timestamp": "2026-01-31T14:54:24.305793"
     },
     {
       "test": "Get Email Detail Structure",
       "success": true,
       "message": "Correctly handles non-existent email",
       "details": null,
-      "timestamp": "2026-01-31T14:51:28.619582"
+      "timestamp": "2026-01-31T14:54:24.871376"
     },
     {
       "test": "Send Email Structure",
       "success": false,
       "message": "HTTP 520",
       "details": "{\"detail\":\"Failed to send email: 404: User not found\"}",
-      "timestamp": "2026-01-31T14:51:29.118514"
+      "timestamp": "2026-01-31T14:54:25.512795"
     },
     {
       "test": "Get Folders Structure",
       "success": false,
       "message": "HTTP 520",
       "details": "{\"detail\":\"Failed to get folders: 404: User not found\"}",
-      "timestamp": "2026-01-31T14:51:29.769313"
+      "timestamp": "2026-01-31T14:54:25.869027"
     },
     {
       "test": "Update Read Status Structure",
       "success": true,
       "message": "Correctly handles non-existent email",
       "details": null,
-      "timestamp": "2026-01-31T14:51:30.369717"
+      "timestamp": "2026-01-31T14:54:26.371862"
     },
     {
       "test": "Delete Email Structure",
       "success": true,
       "message": "Correctly handles non-existent email",
       "details": null,
-      "timestamp": "2026-01-31T14:51:30.871203"
+      "timestamp": "2026-01-31T14:54:27.123057"
     },
     {
       "test": "Search Emails Structure",
       "success": false,
-      "message": "HTTP 404",
-      "details": "{\"detail\":\"Email not found\"}",
-      "timestamp": "2026-01-31T14:51:31.375200"
+      "message": "CRITICAL: Route ordering issue - /emails/search matched by /emails/{email_id}",
+      "details": {
+        "detail": "Email not found"
+      },
+      "timestamp": "2026-01-31T14:54:27.605635"
     },
     {
       "test": "CORS Headers",
-      "success": false,
-      "message": "Missing CORS headers (0/3)",
+      "success": true,
+      "message": "CORS configured (2/2 headers found)",
       "details": null,
-      "timestamp": "2026-01-31T14:51:31.880764"
+      "timestamp": "2026-01-31T14:54:28.024885"
     }
   ]
 }
