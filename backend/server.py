@@ -345,6 +345,36 @@ async def sync_emails(request: SyncRequest):
             detail=f"Sync failed: {str(e)}"
         )
 
+@api_router.get("/emails/search")
+async def search_emails(
+    user_id: str,
+    query: str,
+    limit: int = 50
+):
+    """
+    Search emails by subject, from, or body
+    """
+    try:
+        # Create text search
+        search_filter = {
+            "user_id": user_id,
+            "$or": [
+                {"subject": {"$regex": query, "$options": "i"}},
+                {"from_address": {"$regex": query, "$options": "i"}},
+                {"body_text": {"$regex": query, "$options": "i"}}
+            ]
+        }
+        
+        emails = await db.emails.find(search_filter).sort("date", -1).limit(limit).to_list(limit)
+        
+        return [EmailMessage(**email) for email in emails]
+    except Exception as e:
+        logger.error(f"Search error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Search failed: {str(e)}"
+        )
+
 @api_router.get("/emails", response_model=List[EmailMessage])
 async def get_emails(
     user_id: str,
