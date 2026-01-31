@@ -136,8 +136,9 @@ class MailAppTester:
     def test_email_sync_structure(self):
         """Test email sync endpoint structure"""
         try:
+            # Use valid MongoDB ObjectId format (24 hex characters)
             sync_data = {
-                "user_id": "test_user_id_123",
+                "user_id": "507f1f77bcf86cd799439011",
                 "folder": "INBOX",
                 "limit": 10
             }
