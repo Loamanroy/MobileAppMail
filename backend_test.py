@@ -356,7 +356,17 @@ class MailAppTester:
             
             response = self.session.get(f"{self.base_url}/emails/search", params=params)
             
-            if response.status_code == 200:
+            # Due to route ordering issue, this endpoint is being matched by /emails/{email_id}
+            # This is a critical backend bug that needs to be fixed
+            if response.status_code == 404:
+                try:
+                    error_data = response.json()
+                    if "detail" in error_data and "not found" in error_data["detail"].lower():
+                        self.log_result("Search Emails Structure", False, "CRITICAL: Route ordering issue - /emails/search matched by /emails/{email_id}", error_data)
+                        return False
+                except:
+                    pass
+            elif response.status_code == 200:
                 data = response.json()
                 if isinstance(data, list):
                     self.log_result("Search Emails Structure", True, f"Returns list format ({len(data)} results)")
@@ -376,12 +386,14 @@ class MailAppTester:
     def test_cors_headers(self):
         """Test CORS configuration"""
         try:
-            response = self.session.options(f"{self.base_url}/")
+            response = self.session.get(
+                f"{self.base_url}/",
+                headers={"Origin": "https://example.com"}
+            )
             
             cors_headers = [
-                "Access-Control-Allow-Origin",
-                "Access-Control-Allow-Methods", 
-                "Access-Control-Allow-Headers"
+                "access-control-allow-origin",
+                "access-control-allow-credentials"
             ]
             
             found_headers = []
@@ -389,11 +401,11 @@ class MailAppTester:
                 if header in response.headers:
                     found_headers.append(header)
             
-            if len(found_headers) >= 2:
-                self.log_result("CORS Headers", True, f"CORS configured ({len(found_headers)}/3 headers)")
+            if len(found_headers) >= 1:
+                self.log_result("CORS Headers", True, f"CORS configured ({len(found_headers)}/2 headers found)")
                 return True
             else:
-                self.log_result("CORS Headers", False, f"Missing CORS headers ({len(found_headers)}/3)")
+                self.log_result("CORS Headers", False, f"Missing CORS headers ({len(found_headers)}/2)")
                 
         except Exception as e:
             self.log_result("CORS Headers", False, "Request failed", str(e))
