@@ -24,7 +24,7 @@ export default function LoginScreen() {
   const [imapHost, setImapHost] = useState('');
   const [imapPort, setImapPort] = useState('993');
   const [smtpHost, setSmtpHost] = useState('');
-  const [smtpPort, setSmtpPort] = useState('587');
+  const [smtpPort, setSmtpPort] = useState('465');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
