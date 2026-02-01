@@ -198,9 +198,21 @@ export default function EmailDetailScreen() {
         )}
 
         <View style={styles.bodySection}>
-          <Text style={styles.bodyText}>
-            {email.body_text || email.body_html || 'Пустое письмо'}
-          </Text>
+          {email.body_html ? (
+            <RenderHtml
+              contentWidth={width - 32}
+              source={{ html: email.body_html }}
+              tagsStyles={{
+                body: { color: '#000', fontSize: 16, lineHeight: 24 },
+                p: { marginBottom: 12 },
+                a: { color: '#007AFF' },
+              }}
+            />
+          ) : (
+            <Text style={styles.bodyText}>
+              {email.body_text || 'Пустое письмо'}
+            </Text>
+          )}
         </View>
       </ScrollView>
     </View>
