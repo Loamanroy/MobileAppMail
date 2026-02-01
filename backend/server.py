@@ -597,6 +597,49 @@ async def get_folders(user_id: str):
             detail=f"Failed to get folders: {str(e)}"
         )
 
+@api_router.get("/contacts")
+async def get_contacts(user_id: str, limit: int = 100):
+    """
+    Get contact list extracted from emails
+    """
+    try:
+        # Get unique email addresses from sent and received emails
+        emails = await db.emails.find(
+            {"user_id": user_id}
+        ).limit(500).to_list(500)
+        
+        contacts = set()
+        for email_doc in emails:
+            # Add recipients
+            if email_doc.get("to_address"):
+                for addr in email_doc["to_address"]:
+                    if addr and '@' in addr:
+                        contacts.add(addr)
+            # Add CC
+            if email_doc.get("cc_address"):
+                for addr in email_doc["cc_address"]:
+                    if addr and '@' in addr:
+                        contacts.add(addr)
+            # Add sender
+            if email_doc.get("from_address") and '@' in email_doc.get("from_address", ""):
+                contacts.add(email_doc["from_address"])
+        
+        # Remove current user's email
+        user = await db.users.find_one({"_id": ObjectId(user_id)})
+        if user:
+            contacts.discard(user["email"])
+        
+        # Convert to sorted list
+        contact_list = sorted(list(contacts))[:limit]
+        
+        return {"contacts": contact_list}
+    except Exception as e:
+        logger.error(f"Get contacts error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get contacts: {str(e)}"
+        )
+
 @api_router.get("/")
 async def root():
     return {"message": "Mail API is running"}
