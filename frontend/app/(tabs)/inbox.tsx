@@ -34,13 +34,6 @@ export default function InboxScreen() {
   const { user } = useAuth();
   const router = useRouter();
 
-  // Reload emails when screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      loadEmails();
-    }, [])
-  );
-
   useEffect(() => {
     loadEmails();
   }, []);
