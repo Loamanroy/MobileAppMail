@@ -224,4 +224,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
+  serverInfo: {
+    textAlign: 'center',
+    fontSize: 12,
+    color: '#999',
+    marginTop: 16,
+  },
 });
