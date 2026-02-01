@@ -18,13 +18,15 @@ import Constants from 'expo-constants';
 
 const BACKEND_URL = Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL || process.env.EXPO_PUBLIC_BACKEND_URL;
 
+// Hardcoded server settings for mail.comfort-sr.ru
+const IMAP_HOST = 'mail.comfort-sr.ru';
+const IMAP_PORT = 993;
+const SMTP_HOST = 'mail.comfort-sr.ru';
+const SMTP_PORT = 465;
+
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [imapHost, setImapHost] = useState('');
-  const [imapPort, setImapPort] = useState('993');
-  const [smtpHost, setSmtpHost] = useState('');
-  const [smtpPort, setSmtpPort] = useState('465');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
