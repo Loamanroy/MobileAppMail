@@ -30,8 +30,16 @@ export default function InboxScreen() {
   const [emails, setEmails] = useState<Email[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const { user } = useAuth();
   const router = useRouter();
+
+  // Reload emails when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadEmails();
+    }, [])
+  );
 
   useEffect(() => {
     loadEmails();
@@ -44,6 +52,10 @@ export default function InboxScreen() {
       );
       const data = await response.json();
       setEmails(data);
+      
+      // Count unread emails
+      const unread = data.filter((email: Email) => !email.is_read).length;
+      setUnreadCount(unread);
     } catch (error) {
       console.error('Failed to load emails:', error);
       Alert.alert('Ошибка', 'Не удалось загрузить письма');
