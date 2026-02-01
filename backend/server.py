@@ -143,12 +143,25 @@ def decode_mime_words(s):
 async def connect_imap(email_addr: str, password: str, imap_config: IMAPConfig):
     """Connect to IMAP server"""
     try:
+        # Set socket timeout to 10 seconds for faster debugging
+        import socket
+        original_timeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(10)
+        
         if imap_config.use_ssl:
             mail = imaplib.IMAP4_SSL(imap_config.host, imap_config.port)
         else:
             mail = imaplib.IMAP4(imap_config.host, imap_config.port)
+        
+        socket.setdefaulttimeout(original_timeout)
         mail.login(email_addr, password)
         return mail
+    except socket.timeout:
+        logger.error(f"IMAP connection timeout: {imap_config.host}:{imap_config.port}")
+        raise HTTPException(
+            status_code=status.HTTP_408_REQUEST_TIMEOUT,
+            detail=f"Connection timeout. Port {imap_config.port} may be blocked by firewall. Try port 993 (SSL)"
+        )
     except Exception as e:
         logger.error(f"IMAP connection error: {str(e)}")
         raise HTTPException(
