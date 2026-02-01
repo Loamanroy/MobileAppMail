@@ -37,11 +37,12 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>\n      <View style={styles.section}>
+    <ScrollView style={styles.container}>
+      <View style={styles.section}>
         <Text style={styles.sectionTitle}>Аккаунт</Text>
         <View style={styles.card}>
           <View style={styles.accountInfo}>
-            <Ionicons name=\"person-circle\" size={48} color=\"#007AFF\" />
+            <Ionicons name="person-circle" size={48} color="#007AFF" />
             <View style={styles.accountText}>
               <Text style={styles.accountEmail}>{user?.email}</Text>
               <Text style={styles.accountLabel}>Активен</Text>
