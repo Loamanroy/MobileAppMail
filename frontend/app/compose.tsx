@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,11 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  FlatList,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 
@@ -25,8 +27,48 @@ export default function ComposeScreen() {
   const [body, setBody] = useState('');
   const [loading, setLoading] = useState(false);
   const [showCc, setShowCc] = useState(false);
+  const [contacts, setContacts] = useState<string[]>([]);
+  const [filteredContacts, setFilteredContacts] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const { user } = useAuth();
+  const { theme } = useTheme();
   const router = useRouter();
+
+  useEffect(() => {
+    loadContacts();
+  }, []);
+
+  const loadContacts = async () => {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/api/contacts?user_id=${user?.userId}&limit=100`
+      );
+      const data = await response.json();
+      setContacts(data.contacts || []);
+    } catch (error) {
+      console.error('Failed to load contacts:', error);
+    }
+  };
+
+  const handleToChange = (text: string) => {
+    setTo(text);
+    
+    // Filter contacts
+    if (text.length > 0) {
+      const filtered = contacts.filter(contact => 
+        contact.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredContacts(filtered.slice(0, 5));
+      setShowSuggestions(filtered.length > 0);
+    } else {
+      setShowSuggestions(false);
+    }
+  };
+
+  const selectContact = (contact: string) => {
+    setTo(contact);
+    setShowSuggestions(false);
+  };
 
   const handleSend = async () => {
     if (!to || !subject || !body) {
@@ -71,89 +113,105 @@ export default function ComposeScreen() {
     }
   };
 
+  const styles = createStyles(theme.colors);
+
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.colors.card, borderBottomColor: theme.colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
-          <Ionicons name="close" size={28} color="#007AFF" />
+          <Ionicons name="close" size={28} color={theme.colors.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Новое письмо</Text>
+        <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Новое письмо</Text>
         <TouchableOpacity
           onPress={handleSend}
           disabled={loading}
           style={styles.sendButton}
         >
           {loading ? (
-            <ActivityIndicator size="small" color="#007AFF" />
+            <ActivityIndicator size="small" color={theme.colors.primary} />
           ) : (
-            <Ionicons name="send" size={24} color="#007AFF" />
+            <Ionicons name="send" size={24} color={theme.colors.primary} />
           )}
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.form} keyboardShouldPersistTaps="handled">
-        <View style={styles.inputRow}>
-          <Text style={styles.label}>Кому:</Text>
+        <View style={[styles.inputRow, { borderBottomColor: theme.colors.border }]}>
+          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>Кому:</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: theme.colors.text }]}
             value={to}
-            onChangeText={setTo}
+            onChangeText={handleToChange}
             placeholder="email@example.com"
+            placeholderTextColor={theme.colors.textSecondary}
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
           />
         </View>
 
-        <View style={styles.divider} />
+        {showSuggestions && (
+          <View style={[styles.suggestionsContainer, { backgroundColor: theme.colors.card }]}>
+            {filteredContacts.map((contact, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[styles.suggestionItem, { borderBottomColor: theme.colors.border }]}
+                onPress={() => selectContact(contact)}
+              >
+                <Ionicons name="person-circle" size={20} color={theme.colors.primary} />
+                <Text style={[styles.suggestionText, { color: theme.colors.text }]}>{contact}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
         {!showCc && (
           <TouchableOpacity
             style={styles.ccButton}
             onPress={() => setShowCc(true)}
           >
-            <Text style={styles.ccButtonText}>Добавить CC</Text>
+            <Text style={[styles.ccButtonText, { color: theme.colors.primary }]}>Добавить CC</Text>
           </TouchableOpacity>
         )}
 
         {showCc && (
           <>
-            <View style={styles.inputRow}>
-              <Text style={styles.label}>CC:</Text>
+            <View style={[styles.inputRow, { borderBottomColor: theme.colors.border }]}>
+              <Text style={[styles.label, { color: theme.colors.textSecondary }]}>CC:</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: theme.colors.text }]}
                 value={cc}
                 onChangeText={setCc}
                 placeholder="email@example.com"
+                placeholderTextColor={theme.colors.textSecondary}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
               />
             </View>
-            <View style={styles.divider} />
           </>
         )}
 
-        <View style={styles.inputRow}>
-          <Text style={styles.label}>Тема:</Text>
+        <View style={[styles.inputRow, { borderBottomColor: theme.colors.border }]}>
+          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>Тема:</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: theme.colors.text }]}
             value={subject}
             onChangeText={setSubject}
             placeholder="Тема письма"
+            placeholderTextColor={theme.colors.textSecondary}
           />
         </View>
 
-        <View style={styles.divider} />
-
         <TextInput
-          style={styles.bodyInput}
+          style={[styles.bodyInput, { color: theme.colors.text, backgroundColor: theme.colors.card }]}
           value={body}
           onChangeText={setBody}
           placeholder="Текст письма..."
+          placeholderTextColor={theme.colors.textSecondary}
           multiline
           textAlignVertical="top"
         />
@@ -162,10 +220,9 @@ export default function ComposeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -173,7 +230,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
     marginTop: 40,
   },
   closeButton: {
@@ -182,7 +238,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
   },
   sendButton: {
     padding: 8,
@@ -195,20 +250,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    borderBottomWidth: 1,
   },
   label: {
     fontSize: 16,
-    color: '#666',
     width: 70,
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#000',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#e0e0e0',
   },
   ccButton: {
     paddingHorizontal: 16,
@@ -216,13 +266,26 @@ const styles = StyleSheet.create({
   },
   ccButtonText: {
     fontSize: 14,
-    color: '#007AFF',
   },
   bodyInput: {
     flex: 1,
     fontSize: 16,
-    color: '#000',
     padding: 16,
     minHeight: 300,
+  },
+  suggestionsContainer: {
+    marginHorizontal: 16,
+    borderRadius: 8,
+    elevation: 3,
+  },
+  suggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+  },
+  suggestionText: {
+    fontSize: 14,
+    marginLeft: 8,
   },
 });
