@@ -34,8 +34,8 @@ export default function LoginScreen() {
   const router = useRouter();
 
   const handleLogin = async () => {
-    if (!email || !password || !imapHost || !smtpHost) {
-      Alert.alert('Ошибка', 'Пожалуйста, заполните все поля');
+    if (!email || !password) {
+      Alert.alert('Ошибка', 'Пожалуйста, введите email и пароль');
       return;
     }
 
@@ -51,13 +51,13 @@ export default function LoginScreen() {
           email,
           password,
           imap_config: {
-            host: imapHost,
-            port: parseInt(imapPort),
+            host: IMAP_HOST,
+            port: IMAP_PORT,
             use_ssl: true,
           },
           smtp_config: {
-            host: smtpHost,
-            port: parseInt(smtpPort),
+            host: SMTP_HOST,
+            port: SMTP_PORT,
             use_tls: true,
           },
         }),
