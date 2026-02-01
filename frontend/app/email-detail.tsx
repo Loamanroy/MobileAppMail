@@ -43,6 +43,7 @@ export default function EmailDetailScreen() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const router = useRouter();
+  const { width } = useWindowDimensions();
 
   useEffect(() => {
     loadEmail();
@@ -65,6 +66,8 @@ export default function EmailDetailScreen() {
           },
           body: JSON.stringify({ is_read: true }),
         });
+        // Update local state to reflect read status
+        setEmail({...data, is_read: true});
       }
     } catch (error) {
       console.error('Failed to load email:', error);
