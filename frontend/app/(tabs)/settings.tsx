@@ -59,10 +59,10 @@ export default function SettingsScreen() {
             onPress={() => router.push('/settings/notifications')}
           >
             <View style={styles.menuItemLeft}>
-              <Ionicons name=\"notifications-outline\" size={24} color=\"#333\" />
+              <Ionicons name="notifications-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Уведомления</Text>
             </View>
-            <Ionicons name=\"chevron-forward\" size={20} color=\"#999\" />
+            <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -72,10 +72,10 @@ export default function SettingsScreen() {
             onPress={() => router.push('/settings/autosync')}
           >
             <View style={styles.menuItemLeft}>
-              <Ionicons name=\"sync-outline\" size={24} color=\"#333\" />
+              <Ionicons name="sync-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Автосинхронизация</Text>
             </View>
-            <Ionicons name=\"chevron-forward\" size={20} color=\"#999\" />
+            <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
 
           <View style={styles.divider} />
@@ -85,10 +85,10 @@ export default function SettingsScreen() {
             onPress={() => router.push('/settings/theme')}
           >
             <View style={styles.menuItemLeft}>
-              <Ionicons name=\"color-palette-outline\" size={24} color=\"#333\" />
+              <Ionicons name="color-palette-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Тема</Text>
             </View>
-            <Ionicons name=\"chevron-forward\" size={20} color=\"#999\" />
+            <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
         </View>
       </View>
@@ -101,17 +101,17 @@ export default function SettingsScreen() {
             onPress={() => router.push('/settings/help')}
           >
             <View style={styles.menuItemLeft}>
-              <Ionicons name=\"help-circle-outline\" size={24} color=\"#333\" />
+              <Ionicons name="help-circle-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Помощь</Text>
             </View>
-            <Ionicons name=\"chevron-forward\" size={20} color=\"#999\" />
+            <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
 
           <View style={styles.divider} />
 
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
-              <Ionicons name=\"information-circle-outline\" size={24} color=\"#333\" />
+              <Ionicons name="information-circle-outline" size={24} color="#333" />
               <Text style={styles.menuItemText}>Версия</Text>
             </View>
             <Text style={styles.versionText}>1.0.0</Text>
@@ -120,7 +120,7 @@ export default function SettingsScreen() {
       </View>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Ionicons name=\"log-out-outline\" size={24} color=\"#fff\" />
+        <Ionicons name="log-out-outline" size={24} color="#fff" />
         <Text style={styles.logoutButtonText}>Выйти</Text>
       </TouchableOpacity>
 
