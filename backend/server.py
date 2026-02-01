@@ -316,19 +316,21 @@ async def sync_emails(request: SyncRequest):
         # Get latest emails (limit)
         latest_messages = message_list[-request.limit:] if len(message_list) > request.limit else message_list
         
+        # Fetch all existing message_ids for this user upfront (optimization to avoid N+1 queries)
+        existing_messages = await db.emails.find(
+            {"user_id": request.user_id, "folder": request.folder},
+            {"message_id": 1}
+        ).to_list(None)
+        existing_message_ids = {msg["message_id"] for msg in existing_messages}
+        
         synced_count = 0
         for num in reversed(latest_messages):
             _, msg_data = mail.fetch(num, "(RFC822)")
             email_message = parse_email_message(msg_data[0][1], request.user_id, request.folder)
             
             if email_message:
-                # Check if email already exists
-                existing = await db.emails.find_one({
-                    "user_id": request.user_id,
-                    "message_id": email_message.message_id
-                })
-                
-                if not existing:
+                # Check if email already exists (using in-memory set for O(1) lookup)
+                if email_message.message_id not in existing_message_ids:
                     await db.emails.insert_one(email_message.dict())
                     synced_count += 1
         
