@@ -130,54 +130,6 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.sectionTitle}>Настройки IMAP</Text>
-
-          <View style={styles.inputContainer}>
-            <Ionicons name="server" size={20} color="#999" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="IMAP сервер (например, imap.example.com)"
-              value={imapHost}
-              onChangeText={setImapHost}
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Ionicons name="settings" size={20} color="#999" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="IMAP порт"
-              value={imapPort}
-              onChangeText={setImapPort}
-              keyboardType="number-pad"
-            />
-          </View>
-
-          <Text style={styles.sectionTitle}>Настройки SMTP</Text>
-
-          <View style={styles.inputContainer}>
-            <Ionicons name="server" size={20} color="#999" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="SMTP сервер (например, smtp.example.com)"
-              value={smtpHost}
-              onChangeText={setSmtpHost}
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Ionicons name="settings" size={20} color="#999" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="SMTP порт"
-              value={smtpPort}
-              onChangeText={setSmtpPort}
-              keyboardType="number-pad"
-            />
-          </View>
-
           <TouchableOpacity
             style={[styles.loginButton, loading && styles.loginButtonDisabled]}
             onPress={handleLogin}
@@ -189,6 +141,10 @@ export default function LoginScreen() {
               <Text style={styles.loginButtonText}>Войти</Text>
             )}
           </TouchableOpacity>
+
+          <Text style={styles.serverInfo}>
+            Сервер: mail.comfort-sr.ru
+          </Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
