@@ -11,6 +11,7 @@ import uuid
 from datetime import datetime
 import imaplib
 import email
+import smtplib
 from email.header import decode_header
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
