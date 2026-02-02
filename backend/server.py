@@ -535,7 +535,8 @@ async def send_email(request: SendEmailRequest):
             port=smtp_config.port,
             username=user["email"],
             password=password,
-            start_tls=smtp_config.use_tls
+            start_tls=smtp_config.use_tls,
+            timeout=30  # 30 second timeout
         )
         
         return {"message": "Email sent successfully"}
