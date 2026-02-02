@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../../../contexts/AuthContext';
-import { useTheme } from '../../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 
