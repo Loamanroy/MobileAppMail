@@ -636,6 +636,8 @@ async def get_contacts(user_id: str, limit: int = 100):
     Get contact list extracted from emails
     """
     try:
+        from bson import ObjectId
+        
         # Get unique email addresses from sent and received emails
         emails = await db.emails.find(
             {"user_id": user_id}
