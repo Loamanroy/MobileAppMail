@@ -499,6 +499,8 @@ async def send_email(request: SendEmailRequest):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
+        logger.info(f"Attempting to send email from {user['email']}")
+        
         # Prepare email
         msg = MIMEMultipart()
         msg['From'] = user["email"]
@@ -523,21 +525,52 @@ async def send_email(request: SendEmailRequest):
                 )
                 msg.attach(part)
         
-        # Send via SMTP
+        # Get SMTP config and password
         smtp_config = SMTPConfig(**user["smtp_config"])
         password = decrypt_password(user["encrypted_password"])
         
+        logger.info(f"SMTP Config: host={smtp_config.host}, port={smtp_config.port}, use_tls={smtp_config.use_tls}")
+        
         recipients = request.to + (request.cc if request.cc else [])
         
-        await aiosmtplib.send(
-            msg,
-            hostname=smtp_config.host,
-            port=smtp_config.port,
-            username=user["email"],
-            password=password,
-            start_tls=smtp_config.use_tls,
-            timeout=30  # 30 second timeout
-        )
+        # Port 465 requires use_ssl=True (implicit TLS), not start_tls
+        # Port 587 requires start_tls=True (explicit TLS)
+        use_tls = smtp_config.use_tls if smtp_config.port == 587 else False
+        use_ssl = True if smtp_config.port == 465 else False
+        
+        logger.info(f"Connecting with use_tls={use_tls}, use_ssl={use_ssl}")
+        
+        try:
+            if use_ssl:
+                # Port 465 - SSL from the start
+                import ssl
+                context = ssl.create_default_context()
+                
+                # Use smtplib for better SSL support on port 465
+                import smtplib
+                with smtplib.SMTP_SSL(smtp_config.host, smtp_config.port, timeout=60, context=context) as server:
+                    logger.info("Connected to SMTP server with SSL")
+                    server.set_debuglevel(1)  # Enable verbose logging
+                    server.login(user["email"], password)
+                    logger.info("Login successful")
+                    server.sendmail(user["email"], recipients, msg.as_string())
+                    logger.info("Email sent successfully")
+            else:
+                # Port 587 - use aiosmtplib with STARTTLS
+                await aiosmtplib.send(
+                    msg,
+                    hostname=smtp_config.host,
+                    port=smtp_config.port,
+                    username=user["email"],
+                    password=password,
+                    start_tls=True,
+                    timeout=60
+                )
+                logger.info("Email sent via STARTTLS")
+        except Exception as smtp_error:
+            logger.error(f"SMTP connection error: {type(smtp_error).__name__}: {str(smtp_error)}")
+            logger.error(traceback.format_exc())
+            raise
         
         return {"message": "Email sent successfully"}
     except Exception as e:
