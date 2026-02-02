@@ -22,6 +22,7 @@ import socket
 import re
 from cryptography.fernet import Fernet
 import asyncio
+import traceback
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
