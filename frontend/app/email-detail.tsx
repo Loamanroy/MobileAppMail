@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import RenderHtml from 'react-native-render-html';
 import Constants from 'expo-constants';
@@ -42,6 +43,7 @@ export default function EmailDetailScreen() {
   const [email, setEmail] = useState<EmailDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const { theme } = useTheme();
   const router = useRouter();
   const { width } = useWindowDimensions();
 
@@ -66,7 +68,6 @@ export default function EmailDetailScreen() {
           },
           body: JSON.stringify({ is_read: true }),
         });
-        // Update local state to reflect read status
         setEmail({...data, is_read: true});
       }
     } catch (error) {
@@ -118,77 +119,79 @@ export default function EmailDetailScreen() {
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
+  const styles = createStyles(theme.colors);
+
   if (loading) {
     return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View style={[styles.centerContainer, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
 
   if (!email) {
     return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>Письмо не найдено</Text>
+      <View style={[styles.centerContainer, { backgroundColor: theme.colors.background }]}>
+        <Text style={[styles.errorText, { color: theme.colors.textSecondary }]}>Письмо не найдено</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.colors.card, borderBottomColor: theme.colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#007AFF" />
+          <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
         </TouchableOpacity>
         <View style={styles.headerActions}>
           <TouchableOpacity style={styles.iconButton} onPress={handleDelete}>
-            <Ionicons name="trash-outline" size={24} color="#FF3B30" />
+            <Ionicons name="trash-outline" size={24} color={theme.colors.notification} />
           </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView style={styles.content}>
-        <Text style={styles.subject}>{email.subject || '(Без темы)'}</Text>
+        <Text style={[styles.subject, { color: theme.colors.text }]}>{email.subject || '(Без темы)'}</Text>
 
-        <View style={styles.infoSection}>
+        <View style={[styles.infoSection, { borderBottomColor: theme.colors.border }]}>
           <View style={styles.infoRow}>
-            <Ionicons name="person" size={20} color="#666" />
-            <Text style={styles.infoLabel}>От:</Text>
-            <Text style={styles.infoValue}>{email.from_address}</Text>
+            <Ionicons name="person" size={20} color={theme.colors.textSecondary} />
+            <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>От:</Text>
+            <Text style={[styles.infoValue, { color: theme.colors.text }]}>{email.from_address}</Text>
           </View>
 
           <View style={styles.infoRow}>
-            <Ionicons name="people" size={20} color="#666" />
-            <Text style={styles.infoLabel}>Кому:</Text>
-            <Text style={styles.infoValue}>{email.to_address.join(', ')}</Text>
+            <Ionicons name="people" size={20} color={theme.colors.textSecondary} />
+            <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Кому:</Text>
+            <Text style={[styles.infoValue, { color: theme.colors.text }]}>{email.to_address.join(', ')}</Text>
           </View>
 
           {email.cc_address && email.cc_address.length > 0 && (
             <View style={styles.infoRow}>
-              <Ionicons name="copy" size={20} color="#666" />
-              <Text style={styles.infoLabel}>CC:</Text>
-              <Text style={styles.infoValue}>{email.cc_address.join(', ')}</Text>
+              <Ionicons name="copy" size={20} color={theme.colors.textSecondary} />
+              <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>CC:</Text>
+              <Text style={[styles.infoValue, { color: theme.colors.text }]}>{email.cc_address.join(', ')}</Text>
             </View>
           )}
 
           <View style={styles.infoRow}>
-            <Ionicons name="time" size={20} color="#666" />
-            <Text style={styles.infoLabel}>Дата:</Text>
-            <Text style={styles.infoValue}>{formatDate(email.date)}</Text>
+            <Ionicons name="time" size={20} color={theme.colors.textSecondary} />
+            <Text style={[styles.infoLabel, { color: theme.colors.textSecondary }]}>Дата:</Text>
+            <Text style={[styles.infoValue, { color: theme.colors.text }]}>{formatDate(email.date)}</Text>
           </View>
         </View>
 
         {email.attachments && email.attachments.length > 0 && (
-          <View style={styles.attachmentsSection}>
-            <Text style={styles.attachmentsTitle}>
+          <View style={[styles.attachmentsSection, { borderBottomColor: theme.colors.border }]}>
+            <Text style={[styles.attachmentsTitle, { color: theme.colors.text }]}>
               Вложения ({email.attachments.length})
             </Text>
             {email.attachments.map((attachment, index) => (
-              <View key={index} style={styles.attachmentItem}>
-                <Ionicons name="document" size={24} color="#007AFF" />
+              <View key={index} style={[styles.attachmentItem, { backgroundColor: theme.colors.background }]}>
+                <Ionicons name="document" size={24} color={theme.colors.primary} />
                 <View style={styles.attachmentInfo}>
-                  <Text style={styles.attachmentName}>{attachment.filename}</Text>
-                  <Text style={styles.attachmentSize}>
+                  <Text style={[styles.attachmentName, { color: theme.colors.text }]}>{attachment.filename}</Text>
+                  <Text style={[styles.attachmentSize, { color: theme.colors.textSecondary }]}>
                     {formatFileSize(attachment.size)}
                   </Text>
                 </View>
@@ -203,13 +206,13 @@ export default function EmailDetailScreen() {
               contentWidth={width - 32}
               source={{ html: email.body_html }}
               tagsStyles={{
-                body: { color: '#000', fontSize: 16, lineHeight: 24 },
+                body: { color: theme.colors.text, fontSize: 16, lineHeight: 24 },
                 p: { marginBottom: 12 },
-                a: { color: '#007AFF' },
+                a: { color: theme.colors.primary },
               }}
             />
           ) : (
-            <Text style={styles.bodyText}>
+            <Text style={[styles.bodyText, { color: theme.colors.text }]}>
               {email.body_text || 'Пустое письмо'}
             </Text>
           )}
@@ -219,16 +222,14 @@ export default function EmailDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -236,7 +237,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
     marginTop: 40,
   },
   backButton: {
@@ -255,7 +255,6 @@ const styles = StyleSheet.create({
   subject: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#000',
     padding: 16,
     paddingBottom: 8,
   },
@@ -263,7 +262,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   infoRow: {
     flexDirection: 'row',
@@ -272,32 +270,27 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 14,
-    color: '#666',
     marginLeft: 8,
     marginRight: 8,
     fontWeight: '500',
   },
   infoValue: {
     fontSize: 14,
-    color: '#000',
     flex: 1,
   },
   attachmentsSection: {
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
   },
   attachmentsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
     marginBottom: 12,
   },
   attachmentItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
-    backgroundColor: '#f5f5f5',
     borderRadius: 8,
     marginBottom: 8,
   },
@@ -307,12 +300,10 @@ const styles = StyleSheet.create({
   },
   attachmentName: {
     fontSize: 14,
-    color: '#000',
     fontWeight: '500',
   },
   attachmentSize: {
     fontSize: 12,
-    color: '#666',
     marginTop: 2,
   },
   bodySection: {
@@ -320,11 +311,9 @@ const styles = StyleSheet.create({
   },
   bodyText: {
     fontSize: 16,
-    color: '#000',
     lineHeight: 24,
   },
   errorText: {
     fontSize: 16,
-    color: '#999',
   },
 });
