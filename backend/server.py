@@ -541,6 +541,7 @@ async def send_email(request: SendEmailRequest):
         return {"message": "Email sent successfully"}
     except Exception as e:
         logger.error(f"Send email error: {str(e)}")
+        logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to send email: {str(e)}"
