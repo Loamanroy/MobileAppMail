@@ -585,7 +585,7 @@ async def send_email(request: SendEmailRequest):
 @api_router.get("/folders", response_model=List[FolderInfo])
 async def get_folders(user_id: str):
     """
-    Get available folders from IMAP
+    Get available folders from IMAP with detailed logging
     """
     try:
         # Get user
@@ -594,34 +594,48 @@ async def get_folders(user_id: str):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
+        logger.info(f"=== FETCHING FOLDERS FOR USER: {user['email']} ===")
+        
         # Connect to IMAP
         password = decrypt_password(user["encrypted_password"])
         imap_config = IMAPConfig(**user["imap_config"])
         mail = await connect_imap(user["email"], password, imap_config)
         
-        # List folders
+        logger.info(f"Connected to IMAP: {imap_config.host}:{imap_config.port}")
+        
+        # List ALL folders with LIST "" "*"
+        logger.info("Executing: LIST \"\" \"*\"")
         _, folder_list = mail.list()
+        
+        logger.info(f"IMAP returned {len(folder_list)} folders:")
+        for idx, folder_info in enumerate(folder_list):
+            logger.info(f"  Folder {idx}: {folder_info}")
+        
+        # Also try LSUB (subscribed folders)
+        try:
+            logger.info("Executing: LSUB \"\" \"*\"")
+            _, lsub_list = mail.lsub()
+            logger.info(f"LSUB returned {len(lsub_list)} subscribed folders:")
+            for idx, folder_info in enumerate(lsub_list):
+                logger.info(f"  Subscribed {idx}: {folder_info}")
+        except:
+            logger.warning("LSUB command not supported or failed")
+        
         folders = []
-        
-        # Standard folders to look for
-        standard_folders = {
-            'INBOX': 'INBOX',
-            'Sent': 'Sent',
-            'Drafts': 'Drafts', 
-            'Trash': 'Trash',
-            'Spam': 'Spam',
-            'Junk': 'Spam'
-        }
-        
-        found_folders = set()
+        seen_folders = set()
         
         for folder_info in folder_list:
             try:
                 # Parse folder name - handle different formats
                 folder_str = folder_info.decode('utf-8', errors='ignore')
+                logger.info(f"Parsing: {folder_str}")
                 
                 # Extract folder name from IMAP response
-                # Format: (\\HasNoChildren) "/" "FolderName"
+                # Format examples:
+                # (\\HasNoChildren) "/" "INBOX"
+                # (\\HasNoChildren \\Sent) "/" "Sent"
+                # (\\HasNoChildren) "." "INBOX.Sent"
+                
                 parts = folder_str.split('"')
                 if len(parts) >= 3:
                     folder_name = parts[-2]
@@ -629,39 +643,51 @@ async def get_folders(user_id: str):
                     # Fallback parsing
                     folder_name = folder_str.split()[-1].strip('"')
                 
+                logger.info(f"  Extracted folder name: {folder_name}")
+                
+                # Skip if already seen
+                if folder_name in seen_folders:
+                    logger.info(f"  Skipping duplicate: {folder_name}")
+                    continue
+                
                 # Try to select folder and get count
                 try:
-                    mail.select(folder_name, readonly=True)
-                    _, message_numbers = mail.search(None, "ALL")
-                    count = len(message_numbers[0].split()) if message_numbers[0] else 0
-                    
-                    # Map to standard folder names
-                    display_name = folder_name
-                    for standard, mapped in standard_folders.items():
-                        if standard.lower() in folder_name.lower():
-                            display_name = mapped
-                            break
-                    
-                    if display_name not in found_folders:
+                    status, select_data = mail.select(folder_name, readonly=True)
+                    if status == 'OK':
+                        _, message_numbers = mail.search(None, "ALL")
+                        count = len(message_numbers[0].split()) if message_numbers[0] else 0
+                        
+                        logger.info(f"  {folder_name}: {count} messages")
+                        
                         folders.append(FolderInfo(
-                            name=display_name,
+                            name=folder_name,
                             message_count=count
                         ))
-                        found_folders.add(display_name)
-                except:
+                        seen_folders.add(folder_name)
+                    else:
+                        logger.warning(f"  Cannot select folder {folder_name}: {select_data}")
+                except Exception as select_error:
+                    logger.warning(f"  Error selecting {folder_name}: {str(select_error)}")
                     continue
-            except Exception as e:
-                logger.warning(f"Error parsing folder: {e}")
+                    
+            except Exception as parse_error:
+                logger.error(f"Error parsing folder: {str(parse_error)}")
+                logger.error(traceback.format_exc())
                 continue
         
         mail.logout()
         
-        # Ensure INBOX is first
-        folders.sort(key=lambda x: (x.name != 'INBOX', x.name))
+        logger.info(f"=== TOTAL FOLDERS FOUND: {len(folders)} ===")
+        for folder in folders:
+            logger.info(f"  - {folder.name} ({folder.message_count} messages)")
+        
+        # Sort: INBOX first, then alphabetically
+        folders.sort(key=lambda x: (x.name.upper() != 'INBOX', x.name.upper()))
         
         return folders
     except Exception as e:
         logger.error(f"Get folders error: {str(e)}")
+        logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get folders: {str(e)}"
