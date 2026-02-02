@@ -566,28 +566,61 @@ async def get_folders(user_id: str):
         _, folder_list = mail.list()
         folders = []
         
+        # Standard folders to look for
+        standard_folders = {
+            'INBOX': 'INBOX',
+            'Sent': 'Sent',
+            'Drafts': 'Drafts', 
+            'Trash': 'Trash',
+            'Spam': 'Spam',
+            'Junk': 'Spam'
+        }
+        
+        found_folders = set()
+        
         for folder_info in folder_list:
-            # Parse folder name
-            folder_str = folder_info.decode()
-            parts = folder_str.split('"')  
-            if len(parts) >= 3:
-                folder_name = parts[-2]
-            else:
-                folder_name = folder_str.split()[-1]
-            
             try:
-                mail.select(folder_name, readonly=True)
-                _, message_numbers = mail.search(None, "ALL")
-                count = len(message_numbers[0].split()) if message_numbers[0] else 0
+                # Parse folder name - handle different formats
+                folder_str = folder_info.decode('utf-8', errors='ignore')
                 
-                folders.append(FolderInfo(
-                    name=folder_name,
-                    message_count=count
-                ))
-            except:
+                # Extract folder name from IMAP response
+                # Format: (\\HasNoChildren) "/" "FolderName"
+                parts = folder_str.split('"')
+                if len(parts) >= 3:
+                    folder_name = parts[-2]
+                else:
+                    # Fallback parsing
+                    folder_name = folder_str.split()[-1].strip('"')
+                
+                # Try to select folder and get count
+                try:
+                    mail.select(folder_name, readonly=True)
+                    _, message_numbers = mail.search(None, "ALL")
+                    count = len(message_numbers[0].split()) if message_numbers[0] else 0
+                    
+                    # Map to standard folder names
+                    display_name = folder_name
+                    for standard, mapped in standard_folders.items():
+                        if standard.lower() in folder_name.lower():
+                            display_name = mapped
+                            break
+                    
+                    if display_name not in found_folders:
+                        folders.append(FolderInfo(
+                            name=display_name,
+                            message_count=count
+                        ))
+                        found_folders.add(display_name)
+                except:
+                    continue
+            except Exception as e:
+                logger.warning(f"Error parsing folder: {e}")
                 continue
         
         mail.logout()
+        
+        # Ensure INBOX is first
+        folders.sort(key=lambda x: (x.name != 'INBOX', x.name))
         
         return folders
     except Exception as e:
