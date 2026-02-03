@@ -623,67 +623,52 @@ async def get_folders(user_id: str):
         
         folders = []
         seen_folders = set()
-        
+
         for folder_info in folder_list:
-            try:
-                # Parse folder name - handle different formats
-                folder_str = folder_info.decode('utf-8', errors='ignore')
-                logger.info(f"Parsing: {folder_str}")
-                
-                # Extract folder name from IMAP response
-                # Format examples:
-                # (\\HasNoChildren) "/" "INBOX"
-                # (\\HasNoChildren \\Sent) "/" "Sent"
-                # (\\HasNoChildren) "." "INBOX.Sent"
-                
-                parts = folder_str.split('"')
-                if len(parts) >= 3:
-                    folder_name = parts[-2]
-                else:
-                    # Fallback parsing
-                    folder_name = folder_str.split()[-1].strip('"')
-                
-                logger.info(f"  Extracted folder name: {folder_name}")
-                
-                # Skip if already seen
-                if folder_name in seen_folders:
-                    logger.info(f"  Skipping duplicate: {folder_name}")
-                    continue
-                
-                # Try to select folder and get count
-                try:
-                    status, select_data = mail.select(folder_name, readonly=True)
-                    if status == 'OK':
-                        _, message_numbers = mail.search(None, "ALL")
-                        count = len(message_numbers[0].split()) if message_numbers[0] else 0
-                        
-                        logger.info(f"  {folder_name}: {count} messages")
-                        
-                        folders.append(FolderInfo(
-                            name=folder_name,
-                            message_count=count
-                        ))
-                        seen_folders.add(folder_name)
-                    else:
-                        logger.warning(f"  Cannot select folder {folder_name}: {select_data}")
-                except Exception as select_error:
-                    logger.warning(f"  Error selecting {folder_name}: {str(select_error)}")
-                    continue
-                    
-            except Exception as parse_error:
-                logger.error(f"Error parsing folder: {str(parse_error)}")
-                logger.error(traceback.format_exc())
+            folder_str = folder_info.decode('utf-8', errors='ignore')
+            print(f"Raw folder line: {folder_str}")
+
+            # Улучшенный парсер: берём имя папки из последней кавычки
+            if '"' in folder_str:
+                # Разбиваем по кавычкам и берём последнее имя
+                name_parts = folder_str.split('"')[-1].strip()
+                folder_name = name_parts if name_parts else folder_str.split()[-1].strip('"')
+            else:
+                folder_name = folder_str.split()[-1].strip('"')
+
+            print(f"Extracted folder_name: '{folder_name}'")
+
+            # Fallback для root
+            if folder_name in ['', '/', '""']:
+                folder_name = 'INBOX'
+                print("Fallback: root → INBOX")
+
+            if folder_name in seen_folders:
+                print(f"Skipping duplicate: {folder_name}")
                 continue
-        
-        mail.logout()
-        
-        logger.info(f"=== TOTAL FOLDERS FOUND: {len(folders)} ===")
-        for folder in folders:
-            logger.info(f"  - {folder.name} ({folder.message_count} messages)")
-        
-        # Sort: INBOX first, then alphabetically
+
+            seen_folders.add(folder_name)
+
+            try:
+                status, select_data = mail.select(folder_name, readonly=True)
+                if status == 'OK':
+                    _, message_numbers = mail.search(None, "ALL")
+                    count = len(message_numbers[0].split()) if message_numbers[0] else 0
+                    print(f"  {folder_name}: {count} messages")
+                    folders.append(FolderInfo(name=folder_name, message_count=count))
+                else:
+                    print(f"  Cannot select {folder_name}: {select_data}")
+            except Exception as e:
+                print(f"  Error selecting {folder_name}: {str(e)}")
+                continue
+
+        print(f"=== TOTAL FOLDERS FOUND: {len(folders)} ===")
+        for f in folders:
+            print(f"  - {f.name} ({f.message_count} messages)")
+
+        # Сортировка: INBOX первым
         folders.sort(key=lambda x: (x.name.upper() != 'INBOX', x.name.upper()))
-        
+
         return folders
     except Exception as e:
         logger.error(f"Get folders error: {str(e)}")
@@ -738,7 +723,7 @@ async def get_contacts(user_id: str, limit: int = 100):
             detail=f"Failed to get contacts: {str(e)}"
         )
 
-@api_router.get("/")
+@app.get("/")
 async def root():
     return {"message": "Mail API is running"}
 
@@ -748,8 +733,9 @@ app.include_router(api_router)
 # CORS
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=["*"],                  # для теста — все origins
+    # allow_origins=["http://localhost:8081", "http://10.128.1.24:8081", "https://irida-acropetal-charita.ngrok-free.dev"],  # если хочешь строго
     allow_credentials=True,
-    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -13,7 +13,7 @@ import sys
 import os
 
 # Get backend URL from frontend .env
-BACKEND_URL = "https://pochtapp.preview.emergentagent.com/api"
+BACKEND_URL = "https://iraida-acropetal-charita.ngrok-free.dev"
 
 class MailAppTester:
     def __init__(self):
